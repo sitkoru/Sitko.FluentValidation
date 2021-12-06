@@ -1,5 +1,7 @@
 namespace Sitko.FluentValidation.Graph;
 
+using System.Globalization;
+using System.Text;
 using global::FluentValidation.Results;
 
 public class ModelValidationResult : IEquatable<ModelValidationResult>
@@ -52,4 +54,26 @@ public class ModelValidationResult : IEquatable<ModelValidationResult>
     }
 
     public override int GetHashCode() => Model.GetHashCode();
+
+    public override string ToString()
+    {
+        var result = new StringBuilder($"Model {Model}");
+        if (IsValid)
+        {
+            result.Append(" is valid");
+        }
+        else
+        {
+            foreach (var validationFailure in Errors)
+            {
+                result.Append(
+#if NET6_0_OR_GREATER
+                    CultureInfo.InvariantCulture,
+#endif
+                    $"\n\t{validationFailure.PropertyName}: {validationFailure.ErrorMessage}");
+            }
+        }
+
+        return result.ToString();
+    }
 }

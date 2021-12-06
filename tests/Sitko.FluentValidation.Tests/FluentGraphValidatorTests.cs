@@ -103,4 +103,16 @@ public class FluentGraphValidatorTests : BaseTest<ValidationTestScope>
         var result = await validator.TryValidateModelAsync(model);
         result.IsValid.Should().BeTrue();
     }
+
+    [Fact]
+    public async Task ResultToString()
+    {
+        var scope = await GetScopeAsync();
+        var validator = scope.GetService<FluentGraphValidator>();
+        var foo = new FooModel();
+        var result = await validator.TryValidateModelAsync(foo);
+        result.ToString().Should()
+            .Be(
+                "Validation errors: \nModel Sitko.FluentValidation.Tests.Data.FooModel\n\tId: 'Id' must not be empty.\n\tBarModels: 'Bar Models' must not be empty.");
+    }
 }
