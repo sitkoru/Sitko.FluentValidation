@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.1;net6.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Authors>George Drak</Authors>
+    <Company>Sitko.Ru</Company>
+    <Product>Sitko.FluentValidation</Product>
+    <Description>Sitko.FluentValidation is set of extensions for FluentValidation</Description>
+    <Summary>Sitko.FluentValidation is set of extensions for FluentValidation</Summary>
+    <Copyright>Copyright © Sitko.ru 2021</Copyright>
+    <RepositoryUrl>https://github.com/sitkoru/Sitko.FluentValidation</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/sitkoru/Sitko.FluentValidation</PackageProjectUrl>
+    <PackageIcon>packageIcon.png</PackageIcon>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="10.3.5"/>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0"/>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0"/>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\LICENSE.md" Pack="true" PackagePath="LICENSE.md"/>
+    <None Include="..\..\packageIcon.png" Pack="true" PackagePath="\"/>
+  </ItemGroup>
+</Project>

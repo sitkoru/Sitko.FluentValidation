@@ -1,0 +1,48 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - "*"
+  pull_request:
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: ghcr.io/sitkoru/actions-container
+    env:
+      PROJECT: "Sitko.FluentValidation"
+      TESTS_PROJECT: "Sitko.FluentValidation.Tests"
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
+      - name: Build
+        run: dotnet build --configuration Release
+      - name: Add Github Actions logger
+        run: dotnet add tests/${{ env.TESTS_PROJECT}}/${{ env.TESTS_PROJECT}}.csproj package GitHubActionsTestLogger
+        shell: bash
+      - name: Run tests
+        run: dotnet test --logger GitHubActions --no-restore tests/${{ env.TESTS_PROJECT}}/${{ env.TESTS_PROJECT}}.csproj
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    container: ghcr.io/sitkoru/actions-container
+    needs: [ build ]
+    if: ${{ github.event_name == 'push' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Semantic Release
+        uses: sitkoru/semantic-release-action@v1
+        env:
+          GH_TOKEN: ${{ secrets.BOT_TOKEN }}
+          GIT_AUTHOR_NAME: ${{ secrets.BOT_NAME }}
+          GIT_AUTHOR_EMAIL: ${{ secrets.BOT_EMAIL }}
+          GIT_COMMITTER_NAME: ${{ secrets.BOT_NAME }}
+          GIT_COMMITTER_EMAIL: ${{ secrets.BOT_EMAIL }}

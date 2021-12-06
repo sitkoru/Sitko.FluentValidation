@@ -1,0 +1,54 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30114.105
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{2DF56E56-F044-4BF9-800A-BC280AA93816}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sitko.FluentValidation", "src\Sitko.FluentValidation\Sitko.FluentValidation.csproj", "{F587AC6D-15AF-4A9A-8481-8BF56BC8778F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{95A12A9F-F866-4301-B0A1-23DCF936590E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{A8D0C137-ACB0-4CF4-8D35-C8F65241F8F2}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\main.yml = .github\workflows\main.yml
+		.github\workflows\release.yml = .github\workflows\release.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Files", "Solution Files", "{16D97919-3599-441B-B88D-07314664CDBF}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		.gitignore = .gitignore
+		LICENSE.md = LICENSE.md
+		packageIcon.png = packageIcon.png
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{08BF860E-4055-44F7-B9DC-2F7C591F21F9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sitko.FluentValidation.Tests", "tests\Sitko.FluentValidation.Tests\Sitko.FluentValidation.Tests.csproj", "{2DDFB898-EFCF-4157-AD76-C4F6C01F43CB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F587AC6D-15AF-4A9A-8481-8BF56BC8778F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F587AC6D-15AF-4A9A-8481-8BF56BC8778F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F587AC6D-15AF-4A9A-8481-8BF56BC8778F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F587AC6D-15AF-4A9A-8481-8BF56BC8778F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2DDFB898-EFCF-4157-AD76-C4F6C01F43CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2DDFB898-EFCF-4157-AD76-C4F6C01F43CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2DDFB898-EFCF-4157-AD76-C4F6C01F43CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2DDFB898-EFCF-4157-AD76-C4F6C01F43CB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{F587AC6D-15AF-4A9A-8481-8BF56BC8778F} = {2DF56E56-F044-4BF9-800A-BC280AA93816}
+		{A8D0C137-ACB0-4CF4-8D35-C8F65241F8F2} = {95A12A9F-F866-4301-B0A1-23DCF936590E}
+		{2DDFB898-EFCF-4157-AD76-C4F6C01F43CB} = {08BF860E-4055-44F7-B9DC-2F7C591F21F9}
+	EndGlobalSection
+EndGlobal

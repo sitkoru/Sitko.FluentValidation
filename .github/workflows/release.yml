@@ -1,0 +1,28 @@
+name: Release
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: ghcr.io/sitkoru/actions-container
+    steps:
+      - uses: actions/checkout@v2
+      - name: Prepare
+        id: prep
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          echo ::set-output name=version::${VERSION}
+      - name: Install .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: |
+            6.0.x
+      - name: Create packages
+        run: dotnet pack -c Release /p:Version=${{ steps.prep.outputs.version }} -o $(pwd)/packages
+      - name: Push to Nuget
+        run: dotnet nuget push packages/*.nupkg --skip-duplicate -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
+
