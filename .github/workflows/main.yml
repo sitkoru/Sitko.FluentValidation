@@ -29,7 +29,6 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
-    container: ghcr.io/sitkoru/actions-container
     needs: [ build ]
     if: ${{ github.event_name == 'push' }}
     steps:
