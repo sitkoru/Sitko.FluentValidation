@@ -1,7 +1,10 @@
+using System.Text;
+
 namespace Sitko.FluentValidation.Graph;
 
+#if NET6_0_OR_GREATER
 using System.Globalization;
-using System.Text;
+#endif
 
 public class ModelsValidationResult
 {
@@ -17,7 +20,7 @@ public class ModelsValidationResult
 #if NET6_0_OR_GREATER
                 CultureInfo.InvariantCulture,
 #endif
-                $"\n{result.ToString()}");
+                $"\n{result}");
         }
 
         return errors.ToString();
