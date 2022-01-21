@@ -1,3 +1,11 @@
+# [1.2.0](https://github.com/sitkoru/Sitko.FluentValidation/compare/1.1.0...1.2.0) (2022-01-21)
+
+
+### Features
+
+* disable validation of enum types ([533b1fe](https://github.com/sitkoru/Sitko.FluentValidation/commit/533b1fef9456afab98217c5523fe3b480f3de12a))
+* update FluentValidation to 10.3.6 ([af21b91](https://github.com/sitkoru/Sitko.FluentValidation/commit/af21b9191a5387f92bf679df273a991f7da19651))
+
 # [1.1.0](https://github.com/sitkoru/Sitko.FluentValidation/compare/1.0.0...1.1.0) (2021-12-06)
 
 
