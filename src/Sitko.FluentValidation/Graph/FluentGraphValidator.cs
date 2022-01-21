@@ -99,6 +99,7 @@ public partial class FluentGraphValidator
         result ??= new ModelsValidationResult();
         if (model is null or string or int or double or float or bool or decimal or long or byte
                 or char or uint or ulong or short or sbyte ||
+            model.GetType().IsEnum ||
             model.GetType().Module.ScopeName == "CommonLanguageRuntimeLibrary" ||
             model.GetType().Module.ScopeName.StartsWith("System", StringComparison.InvariantCulture) ||
             model.GetType().Namespace?.StartsWith("System", StringComparison.InvariantCulture) == true ||

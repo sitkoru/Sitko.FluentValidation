@@ -92,6 +92,10 @@ public class FluentGraphValidatorTests : BaseTest<ValidationTestScope>
         var model = "some string";
         var result = await validator.TryValidateModelAsync(model);
         result.IsValid.Should().BeTrue();
+
+        var enumValue = BarType.Baz;
+        result = await validator.TryValidateModelAsync(enumValue);
+        result.IsValid.Should().BeTrue();
     }
 
     [Fact]
