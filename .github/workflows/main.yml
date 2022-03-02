@@ -15,7 +15,7 @@ jobs:
       PROJECT: "Sitko.FluentValidation"
       TESTS_PROJECT: "Sitko.FluentValidation.Tests"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-dotnet@v1
         with:
           dotnet-version: '6.0.x'
@@ -33,7 +33,7 @@ jobs:
     if: ${{ github.event_name == 'push' }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
           persist-credentials: false
