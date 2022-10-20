@@ -1,3 +1,13 @@
+# [1.3.0](https://github.com/sitkoru/Sitko.FluentValidation/compare/1.2.0...1.3.0) (2022-10-20)
+
+
+### Features
+
+* add model path to validation result ([00abbf7](https://github.com/sitkoru/Sitko.FluentValidation/commit/00abbf774e9b115405973fd7680be6311a8bc624))
+* support excluding namespaces from validation ([6b320a6](https://github.com/sitkoru/Sitko.FluentValidation/commit/6b320a6aaf3abd5c9b8fcf08237e93c597f63c10))
+* upd deps ([2f70b99](https://github.com/sitkoru/Sitko.FluentValidation/commit/2f70b991326144bf75de4aaf68cc354f2f73e501))
+* upd deps ([f815c5c](https://github.com/sitkoru/Sitko.FluentValidation/commit/f815c5ca757fbe84f6747904c13b67a603034770))
+
 # [1.2.0](https://github.com/sitkoru/Sitko.FluentValidation/compare/1.1.0...1.2.0) (2022-01-21)
 
 
