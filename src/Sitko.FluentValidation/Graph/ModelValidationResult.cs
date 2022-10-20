@@ -1,20 +1,24 @@
 namespace Sitko.FluentValidation.Graph;
 
+#if NET6_0_OR_GREATER
 using System.Globalization;
+#endif
 using System.Text;
 using global::FluentValidation.Results;
 
 public class ModelValidationResult : IEquatable<ModelValidationResult>
 {
-    public ModelValidationResult(object model) => Model = model;
-
-    public ModelValidationResult(object model, IEnumerable<ValidationFailure> errors)
+    public ModelValidationResult(object model, string path)
     {
         Model = model;
-        Errors.AddRange(errors);
+        Path = path;
     }
 
+    public ModelValidationResult(object model, string path, IEnumerable<ValidationFailure> errors) :
+        this(model, path) => Errors.AddRange(errors);
+
     public object Model { get; }
+    public string Path { get; }
     public bool IsValid => !Errors.Any();
     public List<ValidationFailure> Errors { get; } = new();
 

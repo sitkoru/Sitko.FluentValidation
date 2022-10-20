@@ -1,21 +1,25 @@
-﻿namespace Sitko.FluentValidation.Graph;
-
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Concurrent;
-using global::FluentValidation;
-using global::FluentValidation.Internal;
+using FluentValidation;
+using FluentValidation.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+
+namespace Sitko.FluentValidation.Graph;
 
 public partial class FluentGraphValidator
 {
     private static readonly ConcurrentDictionary<Type, Type?> TypesValidators = new();
     private readonly ILogger<FluentGraphValidator> logger;
+    private readonly IOptions<FluentGraphValidatorOptions> options;
     private readonly IServiceScope serviceScope;
 
-    public FluentGraphValidator(IServiceProvider serviceProvider, ILogger<FluentGraphValidator> logger)
+    public FluentGraphValidator(IServiceProvider serviceProvider, ILogger<FluentGraphValidator> logger,
+        IOptions<FluentGraphValidatorOptions> options)
     {
         this.logger = logger;
+        this.options = options;
         serviceScope = serviceProvider.CreateScope();
     }
 
@@ -78,7 +82,7 @@ public partial class FluentGraphValidator
         {
             var validatorSelector = new MemberNameValidatorSelector(new[] { fieldName });
             var validationContext = CreateValidationContext(model, validatorSelector);
-            return await TryValidateModelAsync(model, validationContext, result, cancellationToken);
+            return await TryValidateModelAsync(model, validationContext, result, "", cancellationToken);
         }
         catch (Exception ex)
         {
@@ -90,10 +94,12 @@ public partial class FluentGraphValidator
     }
 
     public Task<ModelsValidationResult> TryValidateModelAsync(object model,
-        CancellationToken cancellationToken = default) => TryValidateModelAsync(model, null, null, cancellationToken);
+        CancellationToken cancellationToken = default) =>
+        TryValidateModelAsync(model, null, null, "", cancellationToken);
 
     public async Task<ModelsValidationResult> TryValidateModelAsync(object model,
         IValidationContext? validationContext, ModelsValidationResult? result,
+        string path = "",
         CancellationToken cancellationToken = default)
     {
         result ??= new ModelsValidationResult();
@@ -103,7 +109,9 @@ public partial class FluentGraphValidator
             model.GetType().Module.ScopeName == "CommonLanguageRuntimeLibrary" ||
             model.GetType().Module.ScopeName.StartsWith("System", StringComparison.InvariantCulture) ||
             model.GetType().Namespace?.StartsWith("System", StringComparison.InvariantCulture) == true ||
-            model.GetType().Namespace?.StartsWith("Microsoft", StringComparison.InvariantCulture) == true)
+            model.GetType().Namespace?.StartsWith("Microsoft", StringComparison.InvariantCulture) == true
+            || options.Value.NamespacePrefixes.Any(prefix =>
+                model.GetType().Namespace?.StartsWith(prefix, StringComparison.InvariantCulture) == true))
         {
             return result;
         }
@@ -117,7 +125,7 @@ public partial class FluentGraphValidator
                 return result;
             }
 
-            var modelResult = new ModelValidationResult(model);
+            var modelResult = new ModelValidationResult(model, path);
             result.Results.Add(modelResult);
 
             var validator = TryGetModelValidator(model);
@@ -137,14 +145,20 @@ public partial class FluentGraphValidator
 
                 if (propertyModel is not string && propertyModel is IEnumerable enumerable)
                 {
+                    var i = 0;
                     foreach (var item in enumerable)
                     {
-                        await TryValidateModelAsync(item, null, result, cancellationToken);
+                        await TryValidateModelAsync(item, null, result,
+                            path + property.Name + $".{i}.",
+                            cancellationToken);
+                        i++;
                     }
                 }
                 else if (propertyModel is not null)
                 {
-                    await TryValidateModelAsync(propertyModel, null, result, cancellationToken);
+                    await TryValidateModelAsync(propertyModel, null, result,
+                        path + property.Name + ".",
+                        cancellationToken);
                 }
             }
 
@@ -157,3 +171,4 @@ public partial class FluentGraphValidator
         }
     }
 }
+
