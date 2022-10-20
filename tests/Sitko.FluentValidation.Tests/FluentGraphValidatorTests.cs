@@ -114,13 +114,26 @@ public class FluentGraphValidatorTests : BaseTest<ValidationTestScope>
         var scope = await GetScopeAsync();
         var validator = scope.GetService<FluentGraphValidator>();
         // ReSharper disable once ExplicitCallerInfoArgument
-        var scopeWithExcludedPrefix = await GetScopeAsync<ValidationWithExcludedPrefixTestScope>("scopeWithExcludedPrefix");
+        var scopeWithExcludedPrefix =
+            await GetScopeAsync<ValidationWithExcludedPrefixTestScope>("scopeWithExcludedPrefix");
         var validatorWithExcludedPrefix = scopeWithExcludedPrefix.GetService<FluentGraphValidator>();
         var foo = new FooModel();
         var result = await validator.TryValidateModelAsync(foo);
         result.IsValid.Should().BeFalse();
         var resultWithExcludedPrefix = await validatorWithExcludedPrefix.TryValidateModelAsync(foo);
         resultWithExcludedPrefix.IsValid.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task Path()
+    {
+        var scope = await GetScopeAsync();
+        var validator = scope.GetService<FluentGraphValidator>();
+        var foo = new FooModel { BarModels = new List<BarModel> { new() } };
+        var result = await validator.TryValidateModelAsync(foo);
+        result.IsValid.Should().BeFalse();
+        result.Results.First(validationResult => validationResult.Model == foo.BarModels.First()).Path.Should()
+            .Be("BarModels.0.");
     }
 
     [Fact]

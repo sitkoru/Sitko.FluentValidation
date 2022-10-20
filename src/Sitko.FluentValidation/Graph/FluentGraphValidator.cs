@@ -82,7 +82,7 @@ public partial class FluentGraphValidator
         {
             var validatorSelector = new MemberNameValidatorSelector(new[] { fieldName });
             var validationContext = CreateValidationContext(model, validatorSelector);
-            return await TryValidateModelAsync(model, validationContext, result, cancellationToken);
+            return await TryValidateModelAsync(model, validationContext, result, "", cancellationToken);
         }
         catch (Exception ex)
         {
@@ -94,10 +94,12 @@ public partial class FluentGraphValidator
     }
 
     public Task<ModelsValidationResult> TryValidateModelAsync(object model,
-        CancellationToken cancellationToken = default) => TryValidateModelAsync(model, null, null, cancellationToken);
+        CancellationToken cancellationToken = default) =>
+        TryValidateModelAsync(model, null, null, "", cancellationToken);
 
     public async Task<ModelsValidationResult> TryValidateModelAsync(object model,
         IValidationContext? validationContext, ModelsValidationResult? result,
+        string path = "",
         CancellationToken cancellationToken = default)
     {
         result ??= new ModelsValidationResult();
@@ -123,7 +125,7 @@ public partial class FluentGraphValidator
                 return result;
             }
 
-            var modelResult = new ModelValidationResult(model);
+            var modelResult = new ModelValidationResult(model, path);
             result.Results.Add(modelResult);
 
             var validator = TryGetModelValidator(model);
@@ -143,14 +145,20 @@ public partial class FluentGraphValidator
 
                 if (propertyModel is not string && propertyModel is IEnumerable enumerable)
                 {
+                    var i = 0;
                     foreach (var item in enumerable)
                     {
-                        await TryValidateModelAsync(item, null, result, cancellationToken);
+                        await TryValidateModelAsync(item, null, result,
+                            path + property.Name + $".{i}.",
+                            cancellationToken);
+                        i++;
                     }
                 }
                 else if (propertyModel is not null)
                 {
-                    await TryValidateModelAsync(propertyModel, null, result, cancellationToken);
+                    await TryValidateModelAsync(propertyModel, null, result,
+                        path + property.Name + ".",
+                        cancellationToken);
                 }
             }
 
@@ -163,3 +171,4 @@ public partial class FluentGraphValidator
         }
     }
 }
+
