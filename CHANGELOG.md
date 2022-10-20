@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/sitkoru/Sitko.FluentValidation/compare/1.4.0...1.5.0) (2022-10-20)
+
+
+### Features
+
+* update docs ([acc49d7](https://github.com/sitkoru/Sitko.FluentValidation/commit/acc49d7619b78ff36dc4d74417d7a91193d14afc))
+
 # [1.4.0](https://github.com/sitkoru/Sitko.FluentValidation/compare/1.3.0...1.4.0) (2022-10-20)
 
 
