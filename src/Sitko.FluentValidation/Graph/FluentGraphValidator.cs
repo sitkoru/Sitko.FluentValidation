@@ -1,21 +1,25 @@
-﻿namespace Sitko.FluentValidation.Graph;
-
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Concurrent;
-using global::FluentValidation;
-using global::FluentValidation.Internal;
+using FluentValidation;
+using FluentValidation.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+
+namespace Sitko.FluentValidation.Graph;
 
 public partial class FluentGraphValidator
 {
     private static readonly ConcurrentDictionary<Type, Type?> TypesValidators = new();
     private readonly ILogger<FluentGraphValidator> logger;
+    private readonly IOptions<FluentGraphValidatorOptions> options;
     private readonly IServiceScope serviceScope;
 
-    public FluentGraphValidator(IServiceProvider serviceProvider, ILogger<FluentGraphValidator> logger)
+    public FluentGraphValidator(IServiceProvider serviceProvider, ILogger<FluentGraphValidator> logger,
+        IOptions<FluentGraphValidatorOptions> options)
     {
         this.logger = logger;
+        this.options = options;
         serviceScope = serviceProvider.CreateScope();
     }
 
@@ -103,7 +107,9 @@ public partial class FluentGraphValidator
             model.GetType().Module.ScopeName == "CommonLanguageRuntimeLibrary" ||
             model.GetType().Module.ScopeName.StartsWith("System", StringComparison.InvariantCulture) ||
             model.GetType().Namespace?.StartsWith("System", StringComparison.InvariantCulture) == true ||
-            model.GetType().Namespace?.StartsWith("Microsoft", StringComparison.InvariantCulture) == true)
+            model.GetType().Namespace?.StartsWith("Microsoft", StringComparison.InvariantCulture) == true
+            || options.Value.NamespacePrefixes.Any(prefix =>
+                model.GetType().Namespace?.StartsWith(prefix, StringComparison.InvariantCulture) == true))
         {
             return result;
         }

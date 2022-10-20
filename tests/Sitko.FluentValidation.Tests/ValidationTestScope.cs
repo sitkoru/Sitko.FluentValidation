@@ -1,4 +1,5 @@
 ﻿using Sitko.Core.App;
+using Sitko.FluentValidation.Graph;
 
 namespace Sitko.FluentValidation.Tests;
 
@@ -16,6 +17,17 @@ public class ValidationTestScope : BaseTestScope
         base.ConfigureServices(applicationContext, services, name);
         services.AddFluentValidationExtensions();
         services.AddValidatorsFromAssemblyContaining<FluentGraphValidatorTests>();
+        return services;
+    }
+}
+
+public class ValidationWithExcludedPrefixTestScope : ValidationTestScope
+{
+    protected override IServiceCollection ConfigureServices(IApplicationContext applicationContext,
+        IServiceCollection services, string name)
+    {
+        base.ConfigureServices(applicationContext, services, name);
+        services.Configure<FluentGraphValidatorOptions>(options => options.NamespacePrefixes.Add("Sitko"));
         return services;
     }
 }
