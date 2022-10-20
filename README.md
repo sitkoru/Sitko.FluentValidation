@@ -16,16 +16,16 @@ Register in DI in `Startup.cs` or `Program.cs`
 services.AddFluentValidationExtensions();
 ```
 
-# FluentGraphValidator
+# IFluentGraphValidator
 
-FluentGraphValidator allows to recursively validate model graph.
+IFluentGraphValidator allows to recursively validate model graph.
 
 ```c#
 public class MyService {
     
-    private FluentGraphValidator _fluentGraphValidator;
+    private IFluentGraphValidator _fluentGraphValidator;
 
-    public MyService(FluentGraphValidator fluentGraphValidator) {
+    public MyService(IFluentGraphValidator fluentGraphValidator) {
         _fluentGraphValidator = fluentGraphValidator;
     }
     
