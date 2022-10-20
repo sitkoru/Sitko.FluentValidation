@@ -1,6 +1,8 @@
 namespace Sitko.FluentValidation.Graph;
 
+#if NET6_0_OR_GREATER
 using System.Globalization;
+#endif
 using System.Text;
 using global::FluentValidation.Results;
 
