@@ -20,6 +20,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddFluentGraphValidator(this IServiceCollection serviceCollection,
         Action<FluentGraphValidatorOptions>? configure = null, string configurationSection = "FluentGraphValidator")
     {
+        serviceCollection.AddScoped<IFluentGraphValidator, FluentGraphValidator>();
         serviceCollection.AddScoped<FluentGraphValidator>();
         serviceCollection.AddOptions<FluentGraphValidatorOptions>()
             .Configure<IConfiguration>((options, configuration) =>

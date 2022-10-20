@@ -8,7 +8,7 @@ using Microsoft.Extensions.Options;
 
 namespace Sitko.FluentValidation.Graph;
 
-public partial class FluentGraphValidator
+public partial class FluentGraphValidator : IFluentGraphValidator
 {
     private static readonly ConcurrentDictionary<Type, Type?> TypesValidators = new();
     private readonly ILogger<FluentGraphValidator> logger;
@@ -22,6 +22,14 @@ public partial class FluentGraphValidator
         this.options = options;
         serviceScope = serviceProvider.CreateScope();
     }
+
+    public Task<ModelsValidationResult> TryValidateFieldAsync(object model, string fieldName,
+        CancellationToken cancellationToken = default) =>
+        TryValidateFieldAsync(model, fieldName, null, cancellationToken);
+
+    public Task<ModelsValidationResult> TryValidateModelAsync(object model,
+        CancellationToken cancellationToken = default) =>
+        TryValidateModelAsync(model, null, null, "", cancellationToken);
 
     private IValidationContext CreateValidationContext(object model, IValidatorSelector? validatorSelector = null)
     {
@@ -70,11 +78,7 @@ public partial class FluentGraphValidator
         Message = "FluentValidation.IValidator<{ModelType}> is not registered in the application service provider")]
     public static partial void ValidatorIsNotRegistered(ILogger logger, string modelType);
 
-    public Task<ModelsValidationResult> TryValidateFieldAsync(object model, string fieldName,
-        CancellationToken cancellationToken = default) =>
-        TryValidateFieldAsync(model, fieldName, null, cancellationToken);
-
-    public async Task<ModelsValidationResult> TryValidateFieldAsync(object model, string fieldName,
+    private async Task<ModelsValidationResult> TryValidateFieldAsync(object model, string fieldName,
         ModelsValidationResult? result,
         CancellationToken cancellationToken = default)
     {
@@ -93,11 +97,7 @@ public partial class FluentGraphValidator
         }
     }
 
-    public Task<ModelsValidationResult> TryValidateModelAsync(object model,
-        CancellationToken cancellationToken = default) =>
-        TryValidateModelAsync(model, null, null, "", cancellationToken);
-
-    public async Task<ModelsValidationResult> TryValidateModelAsync(object model,
+    private async Task<ModelsValidationResult> TryValidateModelAsync(object model,
         IValidationContext? validationContext, ModelsValidationResult? result,
         string path = "",
         CancellationToken cancellationToken = default)
