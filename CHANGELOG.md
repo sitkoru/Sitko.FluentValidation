@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/sitkoru/Sitko.FluentValidation/compare/1.3.0...1.4.0) (2022-10-20)
+
+
+### Features
+
+* add IFluentGraphValidator interface ([fdbe32b](https://github.com/sitkoru/Sitko.FluentValidation/commit/fdbe32bbf3991854a9620f1f7828d60aada91c9e))
+
 # [1.3.0](https://github.com/sitkoru/Sitko.FluentValidation/compare/1.2.0...1.3.0) (2022-10-20)
 
 
