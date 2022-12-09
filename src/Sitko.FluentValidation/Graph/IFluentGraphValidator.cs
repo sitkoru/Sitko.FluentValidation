@@ -7,4 +7,10 @@ public interface IFluentGraphValidator
 
     Task<ModelsValidationResult> TryValidateModelAsync(object model,
         CancellationToken cancellationToken = default);
+
+    Task<ModelsValidationResult> TryValidateFieldAsync(ModelFieldGraphValidationContext fieldGraphValidationContext,
+        CancellationToken cancellationToken = default);
+
+    Task<ModelsValidationResult> TryValidateModelAsync(ModelGraphValidationContext modelGraphValidationContext,
+        CancellationToken cancellationToken = default);
 }

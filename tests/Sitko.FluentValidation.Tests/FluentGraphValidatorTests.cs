@@ -52,6 +52,18 @@ public class FluentGraphValidatorTests : BaseTest<ValidationTestScope>
     }
 
     [Fact]
+    public async Task SkipChildValidation()
+    {
+        var scope = await GetScopeAsync();
+        var validator = scope.GetService<FluentGraphValidator>();
+        var bar = new BarModel { Val = 0 };
+        var foo = new FooModel { Id = Guid.NewGuid(), BarModels = new List<BarModel> { bar } };
+        var result = await validator.TryValidateModelAsync(new ModelGraphValidationContext(foo,
+            new GraphValidationContextOptions { NeedToValidate = model => model is not BarModel }));
+        result.IsValid.Should().BeTrue();
+    }
+
+    [Fact]
     public async Task ValidateOnlyChildren()
     {
         var scope = await GetScopeAsync();

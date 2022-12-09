@@ -23,13 +23,26 @@ public partial class FluentGraphValidator : IFluentGraphValidator
         serviceScope = serviceProvider.CreateScope();
     }
 
+    public Task<ModelsValidationResult> TryValidateFieldAsync(
+        ModelFieldGraphValidationContext fieldGraphValidationContext,
+        CancellationToken cancellationToken = default) =>
+        TryValidateFieldAsync(fieldGraphValidationContext, null, null, cancellationToken);
+
+    public Task<ModelsValidationResult> TryValidateModelAsync(ModelGraphValidationContext modelGraphValidationContext,
+        CancellationToken cancellationToken = default) =>
+        TryValidateModelAsync(modelGraphValidationContext,
+            CreateValidationContext(modelGraphValidationContext.Model, null), null, "", cancellationToken);
+
     public Task<ModelsValidationResult> TryValidateFieldAsync(object model, string fieldName,
         CancellationToken cancellationToken = default) =>
-        TryValidateFieldAsync(model, fieldName, null, null, cancellationToken);
+        TryValidateFieldAsync(
+            new ModelFieldGraphValidationContext(model, fieldName, new GraphValidationContextOptions()), null, null,
+            cancellationToken);
 
     public Task<ModelsValidationResult> TryValidateModelAsync(object model,
         CancellationToken cancellationToken = default) =>
-        TryValidateModelAsync(model, CreateValidationContext(model, null), null, "", cancellationToken);
+        TryValidateModelAsync(new ModelGraphValidationContext(model, new GraphValidationContextOptions()),
+            CreateValidationContext(model, null), null, "", cancellationToken);
 
     private ValidationContext<object> CreateValidationContext(object model, ValidationContext<object>? parent,
         IValidatorSelector? validatorSelector = null)
@@ -80,56 +93,71 @@ public partial class FluentGraphValidator : IFluentGraphValidator
         Message = "FluentValidation.IValidator<{ModelType}> is not registered in the application service provider")]
     public static partial void ValidatorIsNotRegistered(ILogger logger, string modelType);
 
-    private async Task<ModelsValidationResult> TryValidateFieldAsync(object model, string fieldName,
+    private async Task<ModelsValidationResult> TryValidateFieldAsync(
+        ModelFieldGraphValidationContext fieldGraphValidationContext,
         ModelsValidationResult? result,
         ValidationContext<object>? parentValidationContext = null,
         CancellationToken cancellationToken = default)
     {
         try
         {
-            var validatorSelector = new MemberNameValidatorSelector(new[] { fieldName });
-            var validationContext = CreateValidationContext(model, parentValidationContext, validatorSelector);
-            return await TryValidateModelAsync(model, validationContext, result, "", cancellationToken);
+            var validatorSelector = new MemberNameValidatorSelector(new[] { fieldGraphValidationContext.FieldName });
+            var validationContext = CreateValidationContext(fieldGraphValidationContext.Model, parentValidationContext,
+                validatorSelector);
+            return await TryValidateModelAsync(fieldGraphValidationContext, validationContext, result, "",
+                cancellationToken);
         }
         catch (Exception ex)
         {
-            var msg = $"An unhandled exception occurred when validating field name: '{fieldName}'";
+            var msg =
+                $"An unhandled exception occurred when validating field name: '{fieldGraphValidationContext.FieldName}'";
 
-            msg += $" of model of type: '{model.GetType()}'";
+            msg += $" of model of type: '{fieldGraphValidationContext.Model.GetType()}'";
             throw new UnhandledValidationException(msg, ex);
         }
     }
 
-    private async Task<ModelsValidationResult> TryValidateModelAsync(object model,
+    private async Task<ModelsValidationResult> TryValidateModelAsync(
+        ModelGraphValidationContext modelGraphValidationContext,
         ValidationContext<object> validationContext, ModelsValidationResult? result,
         string path = "",
         CancellationToken cancellationToken = default)
     {
         result ??= new ModelsValidationResult();
-        if (model is null or string or int or double or float or bool or decimal or long or byte
+        if (modelGraphValidationContext.Options.NeedToValidate?.Invoke(modelGraphValidationContext.Model) == false)
+        {
+            return result;
+        }
+
+        if (modelGraphValidationContext.Model is null or string or int or double or float or bool or decimal or long
+                or byte
                 or char or uint or ulong or short or sbyte ||
-            model.GetType().IsEnum ||
-            model.GetType().Module.ScopeName == "CommonLanguageRuntimeLibrary" ||
-            model.GetType().Module.ScopeName.StartsWith("System", StringComparison.InvariantCulture) ||
-            model.GetType().Namespace?.StartsWith("System", StringComparison.InvariantCulture) == true ||
-            model.GetType().Namespace?.StartsWith("Microsoft", StringComparison.InvariantCulture) == true
+            modelGraphValidationContext.Model.GetType().IsEnum ||
+            modelGraphValidationContext.Model.GetType().Module.ScopeName == "CommonLanguageRuntimeLibrary" ||
+            modelGraphValidationContext.Model.GetType().Module.ScopeName
+                .StartsWith("System", StringComparison.InvariantCulture) ||
+            modelGraphValidationContext.Model.GetType().Namespace
+                ?.StartsWith("System", StringComparison.InvariantCulture) == true ||
+            modelGraphValidationContext.Model.GetType().Namespace
+                ?.StartsWith("Microsoft", StringComparison.InvariantCulture) == true
             || options.Value.NamespacePrefixes.Any(prefix =>
-                model.GetType().Namespace?.StartsWith(prefix, StringComparison.InvariantCulture) == true))
+                modelGraphValidationContext.Model.GetType().Namespace
+                    ?.StartsWith(prefix, StringComparison.InvariantCulture) == true))
         {
             return result;
         }
 
         try
         {
-            if (result.Results.Any(r => r.Model.Equals(model)))
+            if (result.Results.Any(r => r.Model.Equals(modelGraphValidationContext.Model)))
             {
                 return result;
             }
 
-            var modelResult = new ModelValidationResult(model, path);
+            var modelResult = new ModelValidationResult(modelGraphValidationContext.Model, path);
             result.Results.Add(modelResult);
 
-            var validator = TryGetModelValidator(model);
+            var validator = TryGetModelValidator(modelGraphValidationContext.Model);
             if (validator is not null)
             {
                 var validationResult = await validator.ValidateAsync(validationContext, cancellationToken);
@@ -139,9 +167,9 @@ public partial class FluentGraphValidator : IFluentGraphValidator
                 }
             }
 
-            foreach (var property in model.GetType().GetProperties())
+            foreach (var property in modelGraphValidationContext.Model.GetType().GetProperties())
             {
-                var propertyModel = property.GetValue(model);
+                var propertyModel = property.GetValue(modelGraphValidationContext.Model);
 
 
                 if (propertyModel is not string && propertyModel is IEnumerable enumerable)
@@ -149,7 +177,9 @@ public partial class FluentGraphValidator : IFluentGraphValidator
                     var i = 0;
                     foreach (var item in enumerable)
                     {
-                        await TryValidateModelAsync(item, CreateValidationContext(item, validationContext),
+                        await TryValidateModelAsync(
+                            new ModelGraphValidationContext(item, modelGraphValidationContext.Options),
+                            CreateValidationContext(item, validationContext),
                             result,
                             path + property.Name + $".{i}.",
                             cancellationToken);
@@ -158,7 +188,8 @@ public partial class FluentGraphValidator : IFluentGraphValidator
                 }
                 else if (propertyModel is not null)
                 {
-                    await TryValidateModelAsync(propertyModel,
+                    await TryValidateModelAsync(
+                        new ModelGraphValidationContext(propertyModel, modelGraphValidationContext.Options),
                         CreateValidationContext(propertyModel, validationContext), result,
                         path + property.Name + ".",
                         cancellationToken);
@@ -169,8 +200,23 @@ public partial class FluentGraphValidator : IFluentGraphValidator
         }
         catch (Exception ex)
         {
-            var msg = $"An unhandled exception occurred when validating object of type: '{model.GetType()}'";
+            var msg =
+                $"An unhandled exception occurred when validating object of type: '{modelGraphValidationContext.Model.GetType()}'";
             throw new UnhandledValidationException(msg, ex);
         }
     }
 }
+
+public record GraphValidationContextOptions
+{
+    public Func<object, bool>? NeedToValidate { get; init; }
+};
+
+public abstract record GraphValidationContext(GraphValidationContextOptions Options);
+
+public record ModelGraphValidationContext
+    (object Model, GraphValidationContextOptions Options) : GraphValidationContext(Options);
+
+public record ModelFieldGraphValidationContext
+    (object Model, string FieldName, GraphValidationContextOptions Options) : ModelGraphValidationContext(Model,
+        Options);
