@@ -38,7 +38,7 @@ public class FluentGraphValidatorTests : BaseTest<ValidationTestScope>
     {
         var scope = await GetScopeAsync();
         var validator = scope.GetService<FluentGraphValidator>();
-        var bar = new BarModel();
+        var bar = new BarModel { Val = 0 };
         var foo = new FooModel { Id = Guid.NewGuid(), BarModels = new List<BarModel> { bar } };
         var result = await validator.TryValidateModelAsync(foo);
         result.IsValid.Should().BeFalse();
@@ -46,8 +46,9 @@ public class FluentGraphValidatorTests : BaseTest<ValidationTestScope>
         result.Results.Where(r => r.IsValid).Should().ContainSingle();
         var fooResult = result.Results.First(r => !r.IsValid);
         fooResult.Model.Should().Be(bar);
-        fooResult.Errors.Should().HaveCount(1);
+        fooResult.Errors.Should().HaveCount(2);
         fooResult.Errors.Should().Contain(failure => failure.PropertyName == nameof(BarModel.TestGuid));
+        fooResult.Errors.Should().Contain(failure => failure.PropertyName == nameof(BarModel.Val));
     }
 
     [Fact]

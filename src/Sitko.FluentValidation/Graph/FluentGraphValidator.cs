@@ -25,20 +25,22 @@ public partial class FluentGraphValidator : IFluentGraphValidator
 
     public Task<ModelsValidationResult> TryValidateFieldAsync(object model, string fieldName,
         CancellationToken cancellationToken = default) =>
-        TryValidateFieldAsync(model, fieldName, null, cancellationToken);
+        TryValidateFieldAsync(model, fieldName, null, null, cancellationToken);
 
     public Task<ModelsValidationResult> TryValidateModelAsync(object model,
         CancellationToken cancellationToken = default) =>
-        TryValidateModelAsync(model, null, null, "", cancellationToken);
+        TryValidateModelAsync(model, CreateValidationContext(model, null), null, "", cancellationToken);
 
-    private IValidationContext CreateValidationContext(object model, IValidatorSelector? validatorSelector = null)
+    private ValidationContext<object> CreateValidationContext(object model, ValidationContext<object>? parent,
+        IValidatorSelector? validatorSelector = null)
     {
         validatorSelector ??= ValidatorOptions.Global.ValidatorSelectors.DefaultValidatorSelectorFactory();
 
-        var context = new ValidationContext<object>(model, new PropertyChain(), validatorSelector)
-        {
-            RootContextData = { ["_FV_ServiceProvider"] = serviceScope.ServiceProvider }
-        };
+        var context = parent?.CloneForChildValidator(model, true, validatorSelector) ??
+                      new ValidationContext<object>(model, new PropertyChain(), validatorSelector)
+                      {
+                          RootContextData = { ["_FV_ServiceProvider"] = serviceScope.ServiceProvider }
+                      };
 
         return context;
     }
@@ -80,12 +82,13 @@ public partial class FluentGraphValidator : IFluentGraphValidator
 
     private async Task<ModelsValidationResult> TryValidateFieldAsync(object model, string fieldName,
         ModelsValidationResult? result,
+        ValidationContext<object>? parentValidationContext = null,
         CancellationToken cancellationToken = default)
     {
         try
         {
             var validatorSelector = new MemberNameValidatorSelector(new[] { fieldName });
-            var validationContext = CreateValidationContext(model, validatorSelector);
+            var validationContext = CreateValidationContext(model, parentValidationContext, validatorSelector);
             return await TryValidateModelAsync(model, validationContext, result, "", cancellationToken);
         }
         catch (Exception ex)
@@ -98,7 +101,7 @@ public partial class FluentGraphValidator : IFluentGraphValidator
     }
 
     private async Task<ModelsValidationResult> TryValidateModelAsync(object model,
-        IValidationContext? validationContext, ModelsValidationResult? result,
+        ValidationContext<object> validationContext, ModelsValidationResult? result,
         string path = "",
         CancellationToken cancellationToken = default)
     {
@@ -118,8 +121,6 @@ public partial class FluentGraphValidator : IFluentGraphValidator
 
         try
         {
-            validationContext ??= CreateValidationContext(model);
-
             if (result.Results.Any(r => r.Model.Equals(model)))
             {
                 return result;
@@ -148,7 +149,8 @@ public partial class FluentGraphValidator : IFluentGraphValidator
                     var i = 0;
                     foreach (var item in enumerable)
                     {
-                        await TryValidateModelAsync(item, null, result,
+                        await TryValidateModelAsync(item, CreateValidationContext(item, validationContext),
+                            result,
                             path + property.Name + $".{i}.",
                             cancellationToken);
                         i++;
@@ -156,7 +158,8 @@ public partial class FluentGraphValidator : IFluentGraphValidator
                 }
                 else if (propertyModel is not null)
                 {
-                    await TryValidateModelAsync(propertyModel, null, result,
+                    await TryValidateModelAsync(propertyModel,
+                        CreateValidationContext(propertyModel, validationContext), result,
                         path + property.Name + ".",
                         cancellationToken);
                 }
@@ -171,4 +174,3 @@ public partial class FluentGraphValidator : IFluentGraphValidator
         }
     }
 }
-
