@@ -1,4 +1,5 @@
 ﻿using System;
+using Sitko.FluentValidation.Graph;
 
 namespace Sitko.FluentValidation.Tests.Data;
 
@@ -13,8 +14,7 @@ public class BarModelValidator : AbstractValidator<BarModel>
         RuleFor(b => b.TestGuid).NotEmpty();
         RuleFor(model => model.Val).Equal(1).When((model, context) =>
         {
-            if (context.IsChildContext &&
-                ((IValidationContext)context).ParentContext.InstanceToValidate is FooModel fooModel &&
+            if (context.GetParentInstance() is FooModel fooModel &&
                 fooModel.Id != Guid.Empty)
             {
                 return true;
