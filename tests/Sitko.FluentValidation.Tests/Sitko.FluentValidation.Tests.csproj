@@ -1,17 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Sitko.Core.Xunit" Version="9.14.0" />
+    <PackageReference Include="Sitko.Core.Xunit" Version="9.14.0"/>
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Sitko.FluentValidation\Sitko.FluentValidation.csproj" />
+    <ProjectReference Include="..\..\src\Sitko.FluentValidation\Sitko.FluentValidation.csproj"/>
   </ItemGroup>
 
 </Project>
