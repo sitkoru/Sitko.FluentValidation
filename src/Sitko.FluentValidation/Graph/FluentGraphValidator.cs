@@ -163,7 +163,13 @@ public partial class FluentGraphValidator : IFluentGraphValidator
                 var validationResult = await validator.ValidateAsync(validationContext, cancellationToken);
                 if (!validationResult.IsValid)
                 {
-                    modelResult.Errors.AddRange(validationResult.Errors);
+                    foreach (var validationFailure in validationResult.Errors)
+                    {
+                        if (!result.Contains(validationFailure))
+                        {
+                            modelResult.Errors.Add(validationFailure);
+                        }
+                    }
                 }
             }
 
@@ -210,7 +216,7 @@ public partial class FluentGraphValidator : IFluentGraphValidator
 public record GraphValidationContextOptions
 {
     public Func<object, bool>? NeedToValidate { get; init; }
-};
+}
 
 public abstract record GraphValidationContext(GraphValidationContextOptions Options);
 

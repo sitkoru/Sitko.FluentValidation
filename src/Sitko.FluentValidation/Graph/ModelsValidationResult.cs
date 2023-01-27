@@ -1,4 +1,5 @@
 using System.Text;
+using FluentValidation.Results;
 
 namespace Sitko.FluentValidation.Graph;
 
@@ -25,4 +26,6 @@ public class ModelsValidationResult
 
         return errors.ToString();
     }
+
+    public bool Contains(ValidationFailure validationFailure) => Results.Any(result => result.Errors.Contains(validationFailure));
 }

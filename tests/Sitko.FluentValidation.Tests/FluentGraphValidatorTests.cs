@@ -1,15 +1,15 @@
-﻿namespace Sitko.FluentValidation.Tests;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Core.Xunit;
-using Data;
 using FluentAssertions;
-using Graph;
+using Sitko.Core.Xunit;
+using Sitko.FluentValidation.Graph;
+using Sitko.FluentValidation.Tests.Data;
 using Xunit;
 using Xunit.Abstractions;
+
+namespace Sitko.FluentValidation.Tests;
 
 public class FluentGraphValidatorTests : BaseTest<ValidationTestScope>
 {
@@ -49,6 +49,20 @@ public class FluentGraphValidatorTests : BaseTest<ValidationTestScope>
         fooResult.Errors.Should().HaveCount(2);
         fooResult.Errors.Should().Contain(failure => failure.PropertyName == nameof(BarModel.TestGuid));
         fooResult.Errors.Should().Contain(failure => failure.PropertyName == nameof(BarModel.Val));
+    }
+
+    [Fact]
+    public async Task ValidateBoth()
+    {
+        var scope = await GetScopeAsync();
+        var validator = scope.GetService<FluentGraphValidator>();
+        var bar = new BarModel { Val = 0 };
+        var foo = new FooModel { Id = Guid.Empty, BarModels = new List<BarModel> { bar } };
+        var result = await validator.TryValidateModelAsync(foo);
+        result.IsValid.Should().BeFalse();
+        result.Results.Should().HaveCount(2);
+        result.Results.Where(r => r.IsValid).Should().BeEmpty();
+        result.Results.SelectMany(r => r.Errors).Should().HaveCount(2);
     }
 
     [Fact]
