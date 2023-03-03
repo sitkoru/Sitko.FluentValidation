@@ -17,7 +17,7 @@ jobs:
           VERSION=${GITHUB_REF#refs/tags/}
           echo ::set-output name=version::${VERSION}
       - name: Create packages
-        run: dotnet pack -c Release /p:Version=${{ steps.prep.outputs.version }} -o $(pwd)/packages
+        run: dotnet pack -c Release /p:Version=${{ steps.prep.outputs.version }}  -p:PackageOutputPath=$(pwd)/packages
       - name: Push to Nuget
         run: dotnet nuget push packages/*.nupkg --skip-duplicate -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
 
