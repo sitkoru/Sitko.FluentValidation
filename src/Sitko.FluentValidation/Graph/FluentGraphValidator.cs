@@ -8,7 +8,7 @@ using Microsoft.Extensions.Options;
 
 namespace Sitko.FluentValidation.Graph;
 
-public partial class FluentGraphValidator : IFluentGraphValidator
+public class FluentGraphValidator : IFluentGraphValidator
 {
     private static readonly ConcurrentDictionary<Type, Type?> TypesValidators = new();
     private readonly ILogger<FluentGraphValidator> logger;
@@ -50,10 +50,7 @@ public partial class FluentGraphValidator : IFluentGraphValidator
         validatorSelector ??= ValidatorOptions.Global.ValidatorSelectors.DefaultValidatorSelectorFactory();
 
         var context = parent?.CloneForChildValidator(model, true, validatorSelector) ??
-                      new ValidationContext<object>(model, new PropertyChain(), validatorSelector)
-                      {
-                          RootContextData = { ["_FV_ServiceProvider"] = serviceScope.ServiceProvider }
-                      };
+                      new ValidationContext<object>(model, new PropertyChain(), validatorSelector) { RootContextData = { ["_FV_ServiceProvider"] = serviceScope.ServiceProvider } };
 
         return context;
     }
@@ -76,7 +73,7 @@ public partial class FluentGraphValidator : IFluentGraphValidator
         var validator = serviceScope.ServiceProvider.GetService(formValidatorType) as IValidator;
         if (validator is null)
         {
-            ValidatorIsNotRegistered(logger, model.GetType().FullName!);
+            logger.LogWarning("FluentValidation.IValidator<{ModelType}> is not registered in the application service provider", model.GetType().FullName);
             TypesValidators[model.GetType()] = null;
         }
         else
@@ -86,12 +83,6 @@ public partial class FluentGraphValidator : IFluentGraphValidator
 
         return validator;
     }
-
-    [LoggerMessage(
-        EventId = 0,
-        Level = LogLevel.Warning,
-        Message = "FluentValidation.IValidator<{ModelType}> is not registered in the application service provider")]
-    public static partial void ValidatorIsNotRegistered(ILogger logger, string modelType);
 
     private async Task<ModelsValidationResult> TryValidateFieldAsync(
         ModelFieldGraphValidationContext fieldGraphValidationContext,
