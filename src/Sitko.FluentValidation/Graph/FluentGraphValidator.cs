@@ -166,6 +166,12 @@ public class FluentGraphValidator : IFluentGraphValidator
 
             foreach (var property in modelGraphValidationContext.Model.GetType().GetProperties())
             {
+                var attr = property.GetCustomAttributes(typeof(SkipGraphValidationAttribute), true).Cast<SkipGraphValidationAttribute>()
+                    .FirstOrDefault();
+                if (attr != null)
+                {
+                    continue;
+                }
                 var propertyModel = property.GetValue(modelGraphValidationContext.Model);
 
 
