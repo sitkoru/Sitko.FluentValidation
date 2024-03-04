@@ -18,6 +18,19 @@ public class FluentGraphValidatorTests : BaseTest<ValidationTestScope>
     }
 
     [Fact]
+    public async Task ValidateSkipAttribute()
+    {
+        var scope = await GetScopeAsync();
+        var validator = scope.GetService<FluentGraphValidator>();
+
+        var bar = new BarModel { Val = 0, FooModels = new List<FooModel> { new() { Id = Guid.NewGuid() } } };
+        var foo = new FooModel { Id = Guid.NewGuid(), BarModels = new List<BarModel> { bar } };
+
+        var result = await validator.TryValidateModelAsync(foo);
+        result.Results.Where(r => r.Model.GetType() == typeof(FooModel)).Should().ContainSingle();
+    }
+
+    [Fact]
     public async Task ValidateParent()
     {
         var scope = await GetScopeAsync();
