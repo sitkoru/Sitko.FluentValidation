@@ -14,6 +14,7 @@ public class FluentGraphValidator : IFluentGraphValidator
     private readonly ILogger<FluentGraphValidator> logger;
     private readonly IOptions<FluentGraphValidatorOptions> options;
     private readonly IServiceScope serviceScope;
+    private readonly ConcurrentDictionary<string, bool> skipAttributes = new();
 
     public FluentGraphValidator(IServiceProvider serviceProvider, ILogger<FluentGraphValidator> logger,
         IOptions<FluentGraphValidatorOptions> options)
@@ -166,9 +167,10 @@ public class FluentGraphValidator : IFluentGraphValidator
 
             foreach (var property in modelGraphValidationContext.Model.GetType().GetProperties())
             {
-                var attr = property.GetCustomAttributes(typeof(SkipGraphValidationAttribute), true).Cast<SkipGraphValidationAttribute>()
-                    .FirstOrDefault();
-                if (attr != null)
+                var needSkipAttribute = skipAttributes.GetOrAdd($"{modelGraphValidationContext.Model.GetType()}_{property.Name}", _ => property.GetCustomAttributes(typeof(SkipGraphValidationAttribute), true)
+                    .Cast<SkipGraphValidationAttribute>()
+                    .FirstOrDefault() != null);
+                if (needSkipAttribute)
                 {
                     continue;
                 }
