@@ -18,7 +18,7 @@ public class FluentGraphValidatorTests : BaseTest<ValidationTestScope>
     }
 
     [Fact]
-    public async Task Validate()
+    public async Task ValidateSkipAttribute()
     {
         var scope = await GetScopeAsync();
         var validator = scope.GetService<FluentGraphValidator>();

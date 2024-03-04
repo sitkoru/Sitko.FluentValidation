@@ -1,4 +1,4 @@
-﻿using Sitko.Core.App;
+﻿using Microsoft.Extensions.Hosting;
 using Sitko.FluentValidation.Graph;
 
 namespace Sitko.FluentValidation.Tests;
@@ -11,23 +11,21 @@ using Microsoft.Extensions.DependencyInjection;
 [UsedImplicitly]
 public class ValidationTestScope : BaseTestScope
 {
-    protected override IServiceCollection ConfigureServices(IApplicationContext applicationContext,
-        IServiceCollection services, string name)
+    protected override IHostApplicationBuilder ConfigureServices(IHostApplicationBuilder builder, string name)
     {
-        base.ConfigureServices(applicationContext, services, name);
-        services.AddFluentValidationExtensions();
-        services.AddValidatorsFromAssemblyContaining<FluentGraphValidatorTests>();
-        return services;
+        base.ConfigureServices(builder, name);
+        builder.Services.AddFluentValidationExtensions();
+        builder.Services.AddValidatorsFromAssemblyContaining<FluentGraphValidatorTests>();
+        return builder;
     }
 }
 
 public class ValidationWithExcludedPrefixTestScope : ValidationTestScope
 {
-    protected override IServiceCollection ConfigureServices(IApplicationContext applicationContext,
-        IServiceCollection services, string name)
+    protected override IHostApplicationBuilder ConfigureServices(IHostApplicationBuilder builder, string name)
     {
-        base.ConfigureServices(applicationContext, services, name);
-        services.Configure<FluentGraphValidatorOptions>(options => options.NamespacePrefixes.Add("Sitko"));
-        return services;
+        base.ConfigureServices(builder, name);
+        builder.Services.Configure<FluentGraphValidatorOptions>(options => options.NamespacePrefixes.Add("Sitko"));
+        return builder;
     }
 }
