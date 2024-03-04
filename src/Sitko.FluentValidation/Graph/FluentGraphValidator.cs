@@ -14,7 +14,7 @@ public class FluentGraphValidator : IFluentGraphValidator
     private readonly ILogger<FluentGraphValidator> logger;
     private readonly IOptions<FluentGraphValidatorOptions> options;
     private readonly IServiceScope serviceScope;
-    private static readonly ConcurrentDictionary<string, bool> IgnorePropertiesCache = new();
+    private static readonly ConcurrentDictionary<string, bool> IgnoredPropertiesCache = new();
 
     public FluentGraphValidator(IServiceProvider serviceProvider, ILogger<FluentGraphValidator> logger,
         IOptions<FluentGraphValidatorOptions> options)
@@ -167,7 +167,7 @@ public class FluentGraphValidator : IFluentGraphValidator
 
             foreach (var property in modelGraphValidationContext.Model.GetType().GetProperties())
             {
-                var isSkippedProperty = IgnorePropertiesCache.GetOrAdd($"{modelGraphValidationContext.Model.GetType()}_{property.Name}", _ => property.GetCustomAttributes(typeof(SkipGraphValidationAttribute), true)
+                var isSkippedProperty = IgnoredPropertiesCache.GetOrAdd($"{modelGraphValidationContext.Model.GetType()}_{property.Name}", _ => property.GetCustomAttributes(typeof(SkipGraphValidationAttribute), true)
                     .Cast<SkipGraphValidationAttribute>()
                     .FirstOrDefault() != null);
                 if (isSkippedProperty)
