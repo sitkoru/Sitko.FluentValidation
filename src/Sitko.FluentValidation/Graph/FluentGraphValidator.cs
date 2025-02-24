@@ -51,7 +51,10 @@ public class FluentGraphValidator : IFluentGraphValidator
         validatorSelector ??= ValidatorOptions.Global.ValidatorSelectors.DefaultValidatorSelectorFactory();
 
         var context = parent?.CloneForChildValidator(model, true, validatorSelector) ??
-                      new ValidationContext<object>(model, new PropertyChain(), validatorSelector) { RootContextData = { ["_FV_ServiceProvider"] = serviceScope.ServiceProvider } };
+                      new ValidationContext<object>(model, new PropertyChain(), validatorSelector)
+                      {
+                          RootContextData = { ["_FV_ServiceProvider"] = serviceScope.ServiceProvider }
+                      };
 
         return context;
     }
@@ -74,7 +77,9 @@ public class FluentGraphValidator : IFluentGraphValidator
         var validator = serviceScope.ServiceProvider.GetService(formValidatorType) as IValidator;
         if (validator is null)
         {
-            logger.LogWarning("FluentValidation.IValidator<{ModelType}> is not registered in the application service provider", model.GetType().FullName);
+            logger.LogWarning(
+                "FluentValidation.IValidator<{ModelType}> is not registered in the application service provider",
+                model.GetType().FullName);
             TypesValidators[model.GetType()] = null;
         }
         else
@@ -167,13 +172,31 @@ public class FluentGraphValidator : IFluentGraphValidator
 
             foreach (var property in modelGraphValidationContext.Model.GetType().GetProperties())
             {
-                var isSkippedProperty = IgnoredPropertiesCache.GetOrAdd($"{modelGraphValidationContext.Model.GetType()}_{property.Name}", _ => property.GetCustomAttributes(typeof(SkipGraphValidationAttribute), true)
-                    .Cast<SkipGraphValidationAttribute>()
-                    .FirstOrDefault() != null);
+                var isSkippedProperty = IgnoredPropertiesCache.GetOrAdd(
+                    $"{modelGraphValidationContext.Model.GetType()}_{property.Name}", _ =>
+                    {
+                        // Skip properties with SkipGraphValidationAttribute
+                        if (property
+                                .GetCustomAttributes(typeof(SkipGraphValidationAttribute), true)
+                                .Cast<SkipGraphValidationAttribute>()
+                                .FirstOrDefault() != null)
+                        {
+                            return true;
+                        }
+
+                        // Skip properties without getter
+                        if (property.GetGetMethod() == null)
+                        {
+                            return true;
+                        }
+
+                        return false;
+                    });
                 if (isSkippedProperty)
                 {
                     continue;
                 }
+
                 var propertyModel = property.GetValue(modelGraphValidationContext.Model);
 
 
@@ -219,9 +242,9 @@ public record GraphValidationContextOptions
 
 public abstract record GraphValidationContext(GraphValidationContextOptions Options);
 
-public record ModelGraphValidationContext
-    (object Model, GraphValidationContextOptions Options) : GraphValidationContext(Options);
+public record ModelGraphValidationContext(object Model, GraphValidationContextOptions Options)
+    : GraphValidationContext(Options);
 
-public record ModelFieldGraphValidationContext
-    (object Model, string FieldName, GraphValidationContextOptions Options) : ModelGraphValidationContext(Model,
+public record ModelFieldGraphValidationContext(object Model, string FieldName, GraphValidationContextOptions Options)
+    : ModelGraphValidationContext(Model,
         Options);
