@@ -1,6 +1,5 @@
 # [2.0.0](https://github.com/sitkoru/Sitko.FluentValidation/compare/1.5.0...2.0.0) (2026-05-18)
 
-
 ### Features
 
 * support only `net8.0` and `net10.0`
