@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Sitko.FluentValidation\Sitko.FluentValidation.csproj"/>
+    <ProjectReference Include="..\..\src\Sitko.FluentValidation\Sitko.FluentValidation.csproj" />
   </ItemGroup>
 
 </Project>
