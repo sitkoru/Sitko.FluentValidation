@@ -19,7 +19,7 @@ jobs:
       - name: Build
         run: dotnet build --configuration Release
       - name: Add Github Actions logger
-        run: dotnet add tests/${{ env.TESTS_PROJECT}}/${{ env.TESTS_PROJECT}}.csproj package GitHubActionsTestLogger
+        run: dotnet add tests/${{ env.TESTS_PROJECT}}/${{ env.TESTS_PROJECT}}.csproj package GitHubActionsTestLogger --version 2.4.1
         shell: bash
       - name: Run tests
         run: dotnet test --logger GitHubActions --no-restore tests/${{ env.TESTS_PROJECT}}/${{ env.TESTS_PROJECT}}.csproj
