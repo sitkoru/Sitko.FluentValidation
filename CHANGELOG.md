@@ -1,3 +1,15 @@
+# [2.0.0](https://github.com/sitkoru/Sitko.FluentValidation/compare/1.5.0...2.0.0) (2026-05-18)
+
+
+### Features
+
+* support only `net8.0` and `net10.0`
+* upgrade to `FluentValidation 12`
+
+### BREAKING CHANGES
+
+* dropped support for previously supported target frameworks; this release requires `net8.0` or `net10.0`
+
 # [1.5.0](https://github.com/sitkoru/Sitko.FluentValidation/compare/1.4.0...1.5.0) (2022-10-20)
 
 

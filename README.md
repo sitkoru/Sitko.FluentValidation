@@ -4,13 +4,15 @@
 
 Set of extensions for [FluentValidation](https://fluentvalidation.net/) library
 
+Supports `net8.0` and `net10.0`.
+
 # Installation
 
 ```
 dotnet add package Sitko.FluentValidation
 ```
 
-Register in DI in `Startup.cs` or `Program.cs`
+Register in DI in `Program.cs` or your service registration setup:
 
 ```c#
 services.AddFluentValidationExtensions();
@@ -22,15 +24,14 @@ IFluentGraphValidator allows to recursively validate model graph.
 
 ```c#
 public class MyService {
-    
-    private IFluentGraphValidator _fluentGraphValidator;
+    private readonly IFluentGraphValidator fluentGraphValidator;
 
     public MyService(IFluentGraphValidator fluentGraphValidator) {
-        _fluentGraphValidator = fluentGraphValidator;
+        this.fluentGraphValidator = fluentGraphValidator;
     }
-    
+
     public async Task SaveDataAsync(MyData data, CancellationToken cancellationToken = default) {
-        var result = await _fluentGraphValidator.TryValidateModelAsync(data, cancellationToken);
+        var result = await fluentGraphValidator.TryValidateModelAsync(data, cancellationToken);
         if(result.IsValid) {
             // validation was successfull
         }
