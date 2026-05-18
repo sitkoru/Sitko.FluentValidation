@@ -47,6 +47,19 @@ public class FluentGraphValidatorTests : BaseTest<ValidationTestScope>
     }
 
     [Fact]
+    public async Task ValidateParentOnAllSupportedTfms()
+    {
+        var scope = await GetScopeAsync();
+        var validator = scope.GetService<FluentGraphValidator>();
+        var foo = new FooModel();
+
+        var result = await validator.TryValidateModelAsync(foo);
+
+        result.IsValid.Should().BeFalse();
+        result.Results.Should().ContainSingle();
+    }
+
+    [Fact]
     public async Task ValidateChild()
     {
         var scope = await GetScopeAsync();
