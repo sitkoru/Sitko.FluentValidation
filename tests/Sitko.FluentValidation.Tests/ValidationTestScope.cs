@@ -14,6 +14,7 @@ public class ValidationTestScope : BaseTestScope
     protected override IHostApplicationBuilder ConfigureServices(IHostApplicationBuilder builder, string name)
     {
         base.ConfigureServices(builder, name);
+        builder.Services.AddScoped<ScopedDependency>();
         builder.Services.AddFluentValidationExtensions();
         builder.Services.AddValidatorsFromAssemblyContaining<FluentGraphValidatorTests>();
         return builder;
