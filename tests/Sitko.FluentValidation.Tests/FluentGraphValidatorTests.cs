@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
+using FluentValidation;
 using Sitko.Core.Xunit;
 using Sitko.FluentValidation.Graph;
 using Sitko.FluentValidation.Tests.Data;
@@ -57,6 +58,23 @@ public class FluentGraphValidatorTests : BaseTest<ValidationTestScope>
 
         result.IsValid.Should().BeFalse();
         result.Results.Should().ContainSingle();
+    }
+
+    [Fact]
+    public async Task ValidatorResolvedFromDiUsesSameScopeAsGraphValidator()
+    {
+        var scope = await GetScopeAsync();
+        var graphValidator = scope.GetService<FluentGraphValidator>();
+        var validator = scope.GetService<global::FluentValidation.IValidator<ScopedDependencyModel>>();
+        var dependency = scope.GetService<ScopedDependency>();
+        var model = new ScopedDependencyModel { ScopeId = dependency.Id };
+
+        var directResult = await validator.ValidateAsync(model);
+        var graphResult = await graphValidator.TryValidateModelAsync(model);
+
+        directResult.IsValid.Should().BeTrue();
+        graphResult.IsValid.Should().BeTrue();
+        graphResult.Results.Should().ContainSingle();
     }
 
     [Fact]
@@ -199,5 +217,23 @@ public class FluentGraphValidatorTests : BaseTest<ValidationTestScope>
         result.ToString().Should()
             .Be(
                 "Validation errors: \nModel Sitko.FluentValidation.Tests.Data.FooModel\n\tId: 'Id' must not be empty.\n\tBarModels: 'Bar Models' must not be empty.");
+    }
+}
+
+public sealed class ScopedDependency
+{
+    public Guid Id { get; } = Guid.NewGuid();
+}
+
+public sealed class ScopedDependencyModel
+{
+    public Guid ScopeId { get; init; }
+}
+
+public sealed class ScopedDependencyModelValidator : AbstractValidator<ScopedDependencyModel>
+{
+    public ScopedDependencyModelValidator(ScopedDependency dependency)
+    {
+        RuleFor(model => model.ScopeId).Equal(dependency.Id);
     }
 }

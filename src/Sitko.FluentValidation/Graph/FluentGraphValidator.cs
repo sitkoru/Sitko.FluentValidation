@@ -13,15 +13,15 @@ public class FluentGraphValidator : IFluentGraphValidator
     private static readonly ConcurrentDictionary<Type, Type?> TypesValidators = new();
     private readonly ILogger<FluentGraphValidator> logger;
     private readonly IOptions<FluentGraphValidatorOptions> options;
-    private readonly IServiceScope serviceScope;
+    private readonly IServiceProvider serviceProvider;
     private static readonly ConcurrentDictionary<string, bool> IgnoredPropertiesCache = new();
 
     public FluentGraphValidator(IServiceProvider serviceProvider, ILogger<FluentGraphValidator> logger,
         IOptions<FluentGraphValidatorOptions> options)
     {
+        this.serviceProvider = serviceProvider;
         this.logger = logger;
         this.options = options;
-        serviceScope = serviceProvider.CreateScope();
     }
 
     public Task<ModelsValidationResult> TryValidateFieldAsync(
@@ -51,10 +51,10 @@ public class FluentGraphValidator : IFluentGraphValidator
         validatorSelector ??= ValidatorOptions.Global.ValidatorSelectors.DefaultValidatorSelectorFactory();
 
         var context = parent?.CloneForChildValidator(model, true, validatorSelector) ??
-                      new ValidationContext<object>(model, new PropertyChain(), validatorSelector)
-                      {
-                          RootContextData = { ["_FV_ServiceProvider"] = serviceScope.ServiceProvider }
-                      };
+                       new ValidationContext<object>(model, new PropertyChain(), validatorSelector)
+                       {
+                           RootContextData = { ["_FV_ServiceProvider"] = serviceProvider }
+                       };
 
         return context;
     }
@@ -74,7 +74,7 @@ public class FluentGraphValidator : IFluentGraphValidator
             formValidatorType = validatorType.MakeGenericType(model.GetType());
         }
 
-        var validator = serviceScope.ServiceProvider.GetService(formValidatorType) as IValidator;
+        var validator = serviceProvider.GetService(formValidatorType) as IValidator;
         if (validator is null)
         {
             logger.LogWarning(
